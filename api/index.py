@@ -11,8 +11,8 @@ from typing import List, Optional
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from .env file in project root
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 # Security: Setup logging to track API usage
 logging.basicConfig(
