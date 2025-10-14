@@ -343,4 +343,6 @@ async def health_check():
 # Security: Rate limiting would be added here in production
 # Security: Authentication middleware would be added here if needed
 
+# Vercel serverless function handler
 handler = app
+app = handler
