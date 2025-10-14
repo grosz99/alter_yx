@@ -346,6 +346,11 @@ async def health_check():
 # Security: Rate limiting would be added here in production
 # Security: Authentication middleware would be added here if needed
 
-# Vercel serverless function handler
-from mangum import Mangum
-handler = Mangum(app)
+# Vercel serverless function handler (only needed for Vercel)
+# Railway and other platforms will use uvicorn directly
+try:
+    from mangum import Mangum
+    handler = Mangum(app)
+except ImportError:
+    # Running on Railway or other non-serverless platforms
+    pass

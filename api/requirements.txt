@@ -2,4 +2,4 @@ fastapi
 anthropic
 python-multipart
 python-dotenv
-mangum
+uvicorn[standard]
