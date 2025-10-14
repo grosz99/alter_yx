@@ -1,0 +1,5 @@
+fastapi
+anthropic
+python-multipart
+python-dotenv
+mangum

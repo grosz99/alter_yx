@@ -11,8 +11,8 @@ from typing import List, Optional
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables from .env file in project root
-load_dotenv(Path(__file__).parent.parent / ".env")
+# Load environment variables from .env file
+load_dotenv()
 
 # Security: Setup logging to track API usage
 logging.basicConfig(
@@ -21,7 +21,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from knowledge.alteryx_mapping import get_alteryx_knowledge
 
 app = FastAPI(
@@ -33,9 +33,12 @@ app = FastAPI(
 # Security: Restrict CORS origins in production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Restrict in production
-    allow_methods=["POST", "GET"],
+    allow_origins=["*"],  # Allow all origins for now
+    allow_credentials=False,  # Must be False when using wildcard origins
+    allow_methods=["GET", "POST", "OPTIONS"],  # Include OPTIONS for preflight
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,  # Cache preflight requests for 1 hour
 )
 
 # Security: Input validation and sanitization
@@ -344,5 +347,5 @@ async def health_check():
 # Security: Authentication middleware would be added here if needed
 
 # Vercel serverless function handler
-handler = app
-app = handler
+from mangum import Mangum
+handler = Mangum(app)

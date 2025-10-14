@@ -1,1 +1,0 @@
-"""Alter-thon API package."""
