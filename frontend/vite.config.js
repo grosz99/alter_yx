@@ -18,14 +18,8 @@ export default defineConfig({
   build: {
     // Security: Generate source maps for debugging but not in production
     sourcemap: false,
-    // Security: Minimize bundle size
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    }
+    // Security: Minimize bundle size (using esbuild, faster than terser)
+    minify: 'esbuild'
   },
   // Security: Configure CSP
   define: {
