@@ -1,4 +1,4 @@
-# ⚡ Alterwise - Quick Start Guide
+# ⚡ Alter-thon - Quick Start Guide
 
 ## 🎉 Your Servers Are Already Running!
 

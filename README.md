@@ -1,4 +1,4 @@
-# Alterwise
+# Alter-thon
 
 Convert Alteryx workflows to Python code using AI. A secure, fast, and reliable tool for data professionals transitioning from Alteryx to Python.
 
@@ -31,7 +31,7 @@ Convert Alteryx workflows to Python code using AI. A secure, fast, and reliable 
 ## 📁 Project Structure
 
 ```
-alterwise/
+alter-thon/
 ├── backend/
 │   ├── knowledge/
 │   │   └── alteryx_mapping.py     # Alteryx to Python knowledge base

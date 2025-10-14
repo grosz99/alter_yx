@@ -1,6 +1,6 @@
-# Alterwise - Local Development Setup
+# Alter-thon - Local Development Setup
 
-Complete guide to running Alterwise locally before deploying to Vercel.
+Complete guide to running Alter-thon locally before deploying to Vercel.
 
 ---
 
@@ -182,7 +182,7 @@ Once both servers are running:
 ```json
 {
   "status": "healthy",
-  "service": "Alterwise API",
+  "service": "Alter-thon API",
   "version": "1.0.0",
   "security": "enabled"
 }

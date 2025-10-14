@@ -320,4 +320,4 @@ The system will now generate Python scripts that work reliably with CSV files re
 ---
 
 **Generated:** October 14, 2025
-**Project:** Alterwise - Alteryx to Python Converter
+**Project:** Alter-thon - Alteryx to Python Converter

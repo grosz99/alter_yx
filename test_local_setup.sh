@@ -3,7 +3,7 @@
 # Quick test script to verify local setup is ready
 
 echo "========================================"
-echo "  ALTERWISE - Local Setup Verification"
+echo "  ALTER-THON - Local Setup Verification"
 echo "========================================"
 echo ""
 

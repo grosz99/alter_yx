@@ -275,7 +275,7 @@ function App() {
     <div className="app">
       <div className="container">
         <header className="header">
-          <h1>⚡ Alterwise</h1>
+          <h1>⚡ Alter-thon</h1>
           <p>Transform Alteryx workflows into Python code</p>
         </header>
 

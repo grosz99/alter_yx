@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Alterwise Backend Startup Script
+# Alter-thon Backend Startup Script
 # This starts the FastAPI backend server
 
 echo "========================================"
-echo "  ALTERWISE - Starting Backend Server"
+echo "  ALTER-THON - Starting Backend Server"
 echo "========================================"
 echo ""
 

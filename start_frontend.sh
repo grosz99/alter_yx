@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Alterwise Frontend Startup Script
+# Alter-thon Frontend Startup Script
 # This starts the React + Vite development server
 
 echo "========================================"
-echo "  ALTERWISE - Starting Frontend Server"
+echo "  ALTER-THON - Starting Frontend Server"
 echo "========================================"
 echo ""
 

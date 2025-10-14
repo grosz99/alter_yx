@@ -25,8 +25,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from knowledge.alteryx_mapping import get_alteryx_knowledge
 
 app = FastAPI(
-    title="Alterwise API",
-    description="Convert Alteryx workflows to Python code",
+    title="Alter-thon API",
+    description="Convert Alteryx workflows to Python code using AI",
     version="1.0.0"
 )
 
@@ -334,8 +334,8 @@ async def execute_script(
 async def health_check():
     """Health check endpoint."""
     return {
-        "status": "healthy", 
-        "service": "Alterwise API",
+        "status": "healthy",
+        "service": "Alter-thon API",
         "version": "1.0.0",
         "security": "enabled"
     }
