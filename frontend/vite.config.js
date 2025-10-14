@@ -6,10 +6,13 @@ export default defineConfig({
   server: {
     port: 5173,
     host: '0.0.0.0', // Listen on all interfaces
-    // Security: Configure CORS properly
-    cors: {
-      origin: ['http://localhost:8000'],
-      credentials: true
+    // Proxy API requests to backend during development
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false
+      }
     }
   },
   build: {

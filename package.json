@@ -1,0 +1,24 @@
+{
+  "name": "alter-thon",
+  "version": "1.0.0",
+  "description": "Convert Alteryx workflows to Python code using AI",
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm install && npm run build",
+    "preview": "cd frontend && npm run preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/grosz99/alter_yx.git"
+  },
+  "keywords": [
+    "alteryx",
+    "python",
+    "pandas",
+    "data-processing",
+    "ai",
+    "claude"
+  ],
+  "author": "grosz99",
+  "license": "MIT"
+}
