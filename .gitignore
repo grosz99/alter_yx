@@ -50,8 +50,6 @@ Thumbs.db
 output/
 *.xlsx
 *.csv
-!sample_sales.csv
-!final_ncc_data.csv
 
 # Vercel
 .vercel
