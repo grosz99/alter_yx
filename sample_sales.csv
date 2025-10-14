@@ -1,0 +1,11 @@
+customer_id,amount,region,product,date
+1,750,North,Widget A,2024-01-15
+2,1200,South,Widget B,2024-01-16
+3,450,East,Widget A,2024-01-17
+4,1800,West,Widget C,2024-01-18
+5,920,North,Widget B,2024-01-19
+6,2100,South,Widget A,2024-01-20
+7,340,East,Widget C,2024-01-21
+8,1550,West,Widget B,2024-01-22
+9,680,North,Widget A,2024-01-23
+10,2300,South,Widget C,2024-01-24
