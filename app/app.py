@@ -9,10 +9,8 @@ import logging
 import re
 from typing import List, Optional
 from pathlib import Path
-from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Note: dotenv not needed in Vercel serverless
 
 # Security: Setup logging to track API usage
 logging.basicConfig(
