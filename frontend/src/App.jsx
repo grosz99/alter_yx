@@ -210,8 +210,8 @@ Respond ONLY with valid JSON in this exact format:
   "output_files": ["output.xlsx"]
 }`;
 
-      // Call serverless proxy (avoids CORS issues)
-      const response = await fetch('/api/generate', {
+      // Call Netlify serverless function (avoids CORS issues)
+      const response = await fetch('/.netlify/functions/generate', {
         method: 'POST',
         headers: {
           'content-type': 'application/json'
