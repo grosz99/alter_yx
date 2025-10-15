@@ -1,9 +1,65 @@
 import { useState } from 'react';
-import axios from 'axios';
 import mermaid from 'mermaid';
 import './App.css';
 
 mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+
+// Alteryx knowledge base embedded in frontend
+const ALTERYX_KNOWLEDGE = `# ALTERYX TO PYTHON CONVERSION GUIDE
+
+You are an expert at converting Alteryx workflows to Python pandas code.
+
+## CORE PRINCIPLES
+1. Use pandas as primary library
+2. Write clean, well-commented code
+3. Include error handling
+4. Make file paths configurable
+5. Add progress print statements
+6. **ALWAYS normalize column names after loading: df.columns = df.columns.str.lower().str.strip()**
+
+## COMMON TOOL MAPPINGS
+
+### Input/Output
+- Input Data → pd.read_csv() or pd.read_excel()
+- Output Data → df.to_csv() or df.to_excel()
+
+### Preparation
+- Filter → df[condition]
+- Select → df[['col1', 'col2']]
+- Sort → df.sort_values()
+- Sample → df.head() or df.sample()
+- Unique → df.drop_duplicates()
+
+### Join/Union
+- Join → pd.merge(df1, df2, on='key')
+- Union → pd.concat([df1, df2])
+
+### Transform
+- Formula → df['new'] = calculation
+- Summarize → df.groupby().agg()
+- Cross Tab → pd.pivot_table()
+
+### Data Cleansing
+- Data Cleansing → str.strip(), str.upper(), fillna()
+- Imputation → fillna(method='ffill') or fillna(mean())
+
+## CODE STRUCTURE
+
+Always include:
+1. Imports (pandas, numpy, pathlib)
+2. Configuration (file paths as variables)
+3. **Column normalization: df.columns = df.columns.str.lower().str.strip()**
+4. Error handling (try/except)
+5. Progress messages (print statements)
+6. Create output directories (Path().mkdir())
+
+## MERMAID DIAGRAM
+
+Generate workflow visualization using:
+graph TB
+    A[📂 Load: file.csv] --> B[🔍 Filter]
+    B --> C[💾 Save: output.xlsx]
+`;
 
 function App() {
   const [files, setFiles] = useState([]);
@@ -13,15 +69,8 @@ function App() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
-  const [executing, setExecuting] = useState(false);
-  const [executionResult, setExecutionResult] = useState(null);
 
-  // Use relative URL in production, localhost in development
-  const API_URL = import.meta.env.VITE_API_URL || (
-    import.meta.env.MODE === 'production' ? '' : 'http://localhost:8000'
-  );
-
-  // Security: Validate file types and sizes
+  // Validate file types and sizes
   const validateFile = (file) => {
     const allowedTypes = [
       'text/csv',
@@ -33,21 +82,19 @@ function App() {
 
     const fileName = file.name.toLowerCase();
     const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
-    
+
     if (!hasValidExtension) {
       throw new Error(`Invalid file type: ${file.name}. Only CSV and Excel files are allowed.`);
     }
-    
+
     if (file.size > maxSize) {
       throw new Error(`File too large: ${file.name}. Maximum size is 10MB.`);
     }
-    
+
     return true;
   };
 
-  // Security: Sanitize user input
   const sanitizeInput = (input) => {
-    // Remove potential script tags and dangerous content
     return input
       .replace(/<script[^>]*>.*?<\/script>/gi, '')
       .replace(/javascript:/gi, '')
@@ -65,14 +112,11 @@ function App() {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files?.length > 0) {
       try {
         const newFiles = Array.from(e.dataTransfer.files);
-        
-        // Security: Validate each file
         newFiles.forEach(validateFile);
-        
         setFiles([...files, ...newFiles]);
         setError(null);
       } catch (err) {
@@ -85,10 +129,7 @@ function App() {
     if (e.target.files?.length > 0) {
       try {
         const newFiles = Array.from(e.target.files);
-        
-        // Security: Validate each file
         newFiles.forEach(validateFile);
-        
         setFiles([...files, ...newFiles]);
         setError(null);
       } catch (err) {
@@ -102,7 +143,7 @@ function App() {
   };
 
   const handleGenerate = async () => {
-    // Security: Validate API key
+    // Validate API key
     if (!apiKey || !apiKey.trim()) {
       setError('Please enter your Anthropic API key');
       return;
@@ -113,7 +154,6 @@ function App() {
       return;
     }
 
-    // Security: Validate input length
     const cleanedRequirement = sanitizeInput(requirement);
 
     if (!cleanedRequirement.trim()) {
@@ -131,48 +171,101 @@ function App() {
     setResult(null);
 
     try {
-      const formData = new FormData();
-      formData.append('requirement', cleanedRequirement);
+      // Get file information
+      const fileInfo = files.map(f => ({
+        name: f.name,
+        size: f.size,
+        type: f.type
+      }));
 
-      // Security: Only append validated files
-      files.forEach(file => {
-        try {
-          validateFile(file);
-          formData.append('files', file);
-        } catch (err) {
-          throw new Error(`File validation failed: ${err.message}`);
-        }
-      });
+      // Build prompt for Claude
+      const prompt = `${ALTERYX_KNOWLEDGE}
 
-      const response = await axios.post(`${API_URL}/api/generate`, formData, {
+## USER REQUEST
+
+Files uploaded: ${fileInfo.length > 0 ? fileInfo.map(f => f.name).join(', ') : 'None'}
+
+User requirement: ${cleanedRequirement}
+
+## YOUR TASK
+
+Generate a complete Python script that:
+1. Loads the data files mentioned
+2. Implements the requested workflow
+3. **CRITICAL**: Includes df.columns = df.columns.str.lower().str.strip() after EVERY read_csv/read_excel
+4. Saves the output appropriately
+
+Also provide:
+- A clear explanation of what the script does
+- A Mermaid diagram showing the workflow
+- List of input files needed
+- List of output files that will be created
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "script": "complete Python code here",
+  "explanation": "what this script does",
+  "diagram": "mermaid diagram code",
+  "input_files": ["file1.csv", "file2.xlsx"],
+  "output_files": ["output.xlsx"]
+}`;
+
+      // Call Anthropic API directly from browser
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'multipart/form-data',
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-API-Key': apiKey  // Send user's API key
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
         },
-        timeout: 30000, // 30 second timeout
+        body: JSON.stringify({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 4096,
+          messages: [{
+            role: 'user',
+            content: prompt
+          }]
+        })
       });
 
-      // Security: Validate response structure
-      if (!response.data || typeof response.data !== 'object') {
-        throw new Error('Invalid response format');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || `API error: ${response.status}`);
       }
 
+      const data = await response.json();
+      const content = data.content[0].text;
+
+      // Parse JSON response
+      let parsedResult;
+      try {
+        // Extract JSON from response (in case Claude adds explanation text)
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsedResult = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('No JSON found in response');
+        }
+      } catch (parseError) {
+        throw new Error('Failed to parse Claude response as JSON');
+      }
+
+      // Validate response structure
       const requiredFields = ['script', 'diagram', 'explanation', 'input_files', 'output_files'];
       for (const field of requiredFields) {
-        if (!(field in response.data)) {
+        if (!(field in parsedResult)) {
           throw new Error(`Missing required field: ${field}`);
         }
       }
 
-      setResult(response.data);
-      
-      // Render Mermaid diagram safely
+      setResult(parsedResult);
+
+      // Render Mermaid diagram
       setTimeout(() => {
         const diagramElement = document.getElementById('mermaid-diagram');
-        if (diagramElement && response.data.diagram) {
+        if (diagramElement && parsedResult.diagram) {
           try {
-            diagramElement.innerHTML = response.data.diagram;
+            diagramElement.innerHTML = parsedResult.diagram;
             mermaid.run({ nodes: [diagramElement] });
           } catch (err) {
             console.error('Mermaid rendering error:', err);
@@ -188,15 +281,15 @@ function App() {
 
     } catch (err) {
       console.error('Generation error:', err);
-      
-      if (err.code === 'ECONNABORTED') {
-        setError('Request timed out. Please try again.');
-      } else if (err.response?.status === 429) {
-        setError('Too many requests. Please wait a moment and try again.');
-      } else if (err.response?.status === 400) {
-        setError(err.response.data?.detail || 'Invalid request. Please check your input.');
-      } else if (err.response?.status >= 500) {
-        setError('Server error. Please try again later.');
+
+      if (err.message.includes('401')) {
+        setError('Invalid API key. Please check your Anthropic API key.');
+      } else if (err.message.includes('429')) {
+        setError('Rate limit exceeded. Please wait a moment and try again.');
+      } else if (err.message.includes('400')) {
+        setError('Invalid request. Please check your input.');
+      } else if (err.message.includes('500') || err.message.includes('503')) {
+        setError('Anthropic API error. Please try again later.');
       } else {
         setError(err.message || 'Failed to generate script. Please try again.');
       }
@@ -220,12 +313,12 @@ function App() {
       if (!result?.script) {
         throw new Error('No script to download');
       }
-      
+
       const blob = new Blob([result.script], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'alterwise_script.py';
+      a.download = 'alteryx_to_python.py';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -236,67 +329,34 @@ function App() {
     }
   };
 
-  const executeScript = async () => {
-    if (!result?.script) {
-      setError('No script to execute');
-      return;
-    }
-
-    setExecuting(true);
-    setExecutionResult(null);
-    setError(null);
-
-    try {
-      const formData = new FormData();
-      formData.append('script', result.script);
-      
-      // Add the same files that were used for generation
-      files.forEach((file) => {
-        formData.append('files', file);
-      });
-
-      const response = await axios.post(`${API_URL}/api/execute`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        timeout: 35000, // 35 second timeout
-      });
-
-      setExecutionResult(response.data);
-      
-      // Scroll to execution results
-      setTimeout(() => {
-        document.getElementById('execution-results')?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-
-    } catch (err) {
-      console.error('Execution error:', err);
-      
-      if (err.code === 'ECONNABORTED') {
-        setError('Execution timed out (max 30 seconds)');
-      } else if (err.response?.status === 408) {
-        setError('Script execution timed out');
-      } else if (err.response?.status === 400) {
-        setError(err.response.data?.detail || 'Script validation failed');
-      } else {
-        setError(err.response?.data?.detail || 'Failed to execute script');
-      }
-    } finally {
-      setExecuting(false);
-    }
-  };
-
   return (
     <div className="app">
       <div className="container">
         <header className="header">
-          <h1>⚡ Alter-thon</h1>
-          <p>Transform Alteryx workflows into Python code</p>
+          <h1>⚡ Alter-YX</h1>
+          <p>Transform Alteryx workflows into Python code with AI</p>
         </header>
 
         <div className="card">
-          <h2>📁 Upload Your Data Files</h2>
-          <div 
+          <h2>🔑 Your Anthropic API Key</h2>
+          <input
+            type="password"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder="sk-ant-api03-..."
+            style={{ width: '100%', padding: '12px', fontSize: '14px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd' }}
+          />
+          <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+            🔒 Your API key is sent directly to Anthropic and never stored.{' '}
+            <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer">
+              Get your API key here
+            </a>
+          </p>
+        </div>
+
+        <div className="card">
+          <h2>📁 Upload Your Data Files (Optional)</h2>
+          <div
             className={`upload-area ${dragActive ? 'dragover' : ''}`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -331,24 +391,7 @@ function App() {
         </div>
 
         <div className="card">
-          <h2>🔑 Your Anthropic API Key</h2>
-          <input
-            type="password"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="sk-ant-api03-..."
-            style={{ width: '100%', padding: '10px', fontSize: '14px', marginBottom: '10px' }}
-          />
-          <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-            🔒 Your API key is sent directly to Anthropic and never stored on our servers.{' '}
-            <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer">
-              Get your API key here
-            </a>
-          </p>
-        </div>
-
-        <div className="card">
-          <h2>💬 What do you want to do?</h2>
+          <h2>💬 Describe Your Alteryx Workflow</h2>
           <textarea
             value={requirement}
             onChange={(e) => setRequirement(e.target.value)}
@@ -359,7 +402,7 @@ function App() {
           <div className="char-count">
             {requirement.length}/5000 characters
           </div>
-          
+
           <div className="examples">
             <p className="examples-label">💡 Try these examples:</p>
             <div className="example-buttons">
@@ -383,7 +426,7 @@ function App() {
           <button
             className="generate-btn"
             onClick={handleGenerate}
-            disabled={loading || !requirement.trim()}
+            disabled={loading || !requirement.trim() || !apiKey.trim()}
             type="button"
           >
             {loading ? '⏳ Generating...' : '🚀 Generate Python Script'}
@@ -399,7 +442,8 @@ function App() {
         {loading && (
           <div className="card loading-card">
             <div className="spinner"></div>
-            <p>Generating your Python script...</p>
+            <p>Generating your Python script with Claude AI...</p>
+            <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>This may take 10-30 seconds</p>
           </div>
         )}
 
@@ -423,27 +467,19 @@ function App() {
               <div className="script-header">
                 <h2>🐍 Your Python Script</h2>
                 <div className="button-group">
-                  <button 
-                    className="btn-secondary" 
+                  <button
+                    className="btn-secondary"
                     onClick={() => copyToClipboard(result.script)}
                     type="button"
                   >
                     📋 Copy Code
                   </button>
-                  <button 
-                    className="btn-secondary" 
+                  <button
+                    className="btn-primary"
                     onClick={downloadScript}
                     type="button"
                   >
                     ⬇️ Download .py
-                  </button>
-                  <button 
-                    className="btn-primary" 
-                    onClick={executeScript}
-                    disabled={executing || !files.length}
-                    type="button"
-                  >
-                    {executing ? '⏳ Executing...' : '▶️ Execute Code'}
                   </button>
                 </div>
               </div>
@@ -468,61 +504,24 @@ function App() {
                 </ul>
               </div>
             </div>
-          </div>
-        )}
 
-        {executionResult && (
-          <div id="execution-results" className="results">
-            <div className={`card ${executionResult.success ? 'success-banner' : 'error-card'}`}>
-              <p>{executionResult.success ? '✅ Code executed successfully!' : `❌ Code execution failed (Return Code: ${executionResult.return_code})`}</p>
+            <div className="card" style={{ backgroundColor: '#f0f9ff', border: '2px solid #0ea5e9' }}>
+              <h3>📝 Next Steps</h3>
+              <ol style={{ marginLeft: '20px', lineHeight: '1.8' }}>
+                <li>Download the Python script above</li>
+                <li>Ensure you have the input files in the same directory</li>
+                <li>Install required packages: <code style={{ background: '#e0e7ff', padding: '2px 6px', borderRadius: '3px' }}>pip install pandas numpy openpyxl</code></li>
+                <li>Run the script: <code style={{ background: '#e0e7ff', padding: '2px 6px', borderRadius: '3px' }}>python alteryx_to_python.py</code></li>
+              </ol>
             </div>
-
-            <div className="card">
-              <h2>📊 Execution Results</h2>
-              
-              {executionResult.stdout && (
-                <div className="execution-section">
-                  <h3>📋 Output</h3>
-                  <pre className="execution-output">{executionResult.stdout}</pre>
-                </div>
-              )}
-              
-              {executionResult.stderr && (
-                <div className="execution-section">
-                  <h3>⚠️ Warnings/Errors</h3>
-                  <pre className="execution-error">{executionResult.stderr}</pre>
-                </div>
-              )}
-              
-              {executionResult.output_files && executionResult.output_files.length > 0 && (
-                <div className="execution-section">
-                  <h3>📤 Generated Files</h3>
-                  <ul className="output-files">
-                    {executionResult.output_files.map((file, i) => (
-                      <li key={i}>
-                        {file.name} ({(file.size / 1024).toFixed(1)} KB)
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              
-              <div className="execution-status">
-                Return Code: {executionResult.return_code} {executionResult.return_code === 0 ? '✅' : '❌'}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {executing && (
-          <div className="card loading-card">
-            <div className="spinner"></div>
-            <p>Executing your Python script...</p>
           </div>
         )}
 
         <footer className="footer">
-          <p>Built with ❤️ using Claude • Powered by Anthropic API</p>
+          <p>Built with ❤️ using Claude AI • Powered by Anthropic API</p>
+          <p style={{ fontSize: '11px', color: '#999', marginTop: '5px' }}>
+            Client-side application - your data and API key never touch our servers
+          </p>
         </footer>
       </div>
     </div>
