@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import anthropic
@@ -33,9 +33,12 @@ app = FastAPI(
 # Security: Restrict CORS origins in production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Restrict in production
-    allow_methods=["POST", "GET"],
+    allow_origins=["*"],  # Allow all origins for now
+    allow_credentials=False,  # Must be False when using wildcard origins
+    allow_methods=["GET", "POST", "OPTIONS"],  # Include OPTIONS for preflight
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,  # Cache preflight requests for 1 hour
 )
 
 # Security: Input validation and sanitization
@@ -128,27 +131,15 @@ def validate_generated_script(script: str) -> None:
 @app.post("/api/generate")
 async def generate_script(
     requirement: str = Form(...),
-    files: List[UploadFile] = File(None),
-    x_api_key: str = Header(None, alias="X-API-Key")
+    files: List[UploadFile] = File(None)
 ):
     """Generate Python script and workflow diagram from natural language."""
-
-    # Security: Validate API key from header (user-provided) or environment (fallback)
-    api_key = x_api_key or os.getenv("ANTHROPIC_API_KEY")
+    
+    # Security: Validate API key
+    api_key = os.getenv("ANTHROPIC_API_KEY")
     if not api_key:
-        logger.error("No API key provided")
-        raise HTTPException(
-            status_code=401,
-            detail="API key required. Please provide your Anthropic API key."
-        )
-
-    # Validate API key format
-    if not api_key.startswith("sk-ant-"):
-        logger.error("Invalid API key format")
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid API key format"
-        )
+        logger.error("ANTHROPIC_API_KEY not configured")
+        raise HTTPException(status_code=500, detail="API configuration error")
     
     # Security: Validate and sanitize inputs
     try:
@@ -355,4 +346,11 @@ async def health_check():
 # Security: Rate limiting would be added here in production
 # Security: Authentication middleware would be added here if needed
 
-handler = app
+# Vercel serverless function handler (only needed for Vercel)
+# Railway and other platforms will use uvicorn directly
+try:
+    from mangum import Mangum
+    handler = Mangum(app)
+except ImportError:
+    # Running on Railway or other non-serverless platforms
+    pass

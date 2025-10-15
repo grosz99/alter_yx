@@ -25,7 +25,7 @@ Convert Alteryx workflows to Python code using AI. A secure, fast, and reliable 
 
 - **Backend**: FastAPI, Anthropic Claude API, Python
 - **Frontend**: React 18, Vite, Axios, Mermaid.js
-- **Deployment**: Railway (backend), Vercel (frontend)
+- **Deployment**: Vercel (both frontend and backend)
 - **Security**: Input validation, CSP headers, file restrictions
 
 ## 📁 Project Structure
@@ -79,37 +79,42 @@ npm run dev
 
 Open http://localhost:5173
 
-## 🚀 Production Deployment
+## 🚀 Deployment to Vercel
 
-**Recommended:** Railway (backend) + Vercel (frontend)
+### Backend Deployment
 
-### Quick Deploy (10 minutes)
+```bash
+cd backend
+vercel login
+vercel --prod
+```
 
-1. **Deploy Backend to Railway**
-   - Visit [railway.app](https://railway.app)
-   - Deploy from GitHub: `grosz99/alter_yx`
-   - Set root directory: `api`
-   - Add environment variable: `ANTHROPIC_API_KEY`
+After deployment, add your API key:
+```bash
+vercel env add ANTHROPIC_API_KEY
+# Enter your Anthropic API key when prompted
+```
 
-2. **Deploy Frontend to Vercel**
-   ```bash
-   cd frontend
-   echo "VITE_API_URL=https://your-railway-url.railway.app" > .env.production
-   npx vercel --prod
-   ```
+### Frontend Deployment
 
-### Detailed Guides
+1. Update `frontend/vercel.json` with your backend URL:
+```json
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*", 
+      "destination": "https://your-backend-url.vercel.app/api/:path*"
+    }
+  ]
+}
+```
 
-- **[QUICK_DEPLOY.md](./QUICK_DEPLOY.md)** - Fast 3-step guide
-- **[DEPLOY_RAILWAY.md](./DEPLOY_RAILWAY.md)** - Detailed Railway setup
-- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Complete strategy & troubleshooting
-
-### Why Railway for Backend?
-
-- ✅ No authentication barriers (Vercel team protection blocks access)
-- ✅ Free tier with $5/month credit
-- ✅ Native Python support
-- ✅ Easy to share with others
+2. Deploy:
+```bash
+cd frontend
+vercel login
+vercel --prod
+```
 
 ## 📖 Usage Guide
 
