@@ -201,14 +201,18 @@ Also provide:
 - List of input files needed
 - List of output files that will be created
 
-Respond ONLY with valid JSON in this exact format:
+CRITICAL: You must respond with ONLY valid JSON. No explanatory text before or after. No markdown code blocks. Just pure JSON.
+
+Use this exact format:
 {
   "script": "complete Python code here",
   "explanation": "what this script does",
-  "diagram": "mermaid diagram code",
+  "diagram": "mermaid diagram code starting with 'graph TB'",
   "input_files": ["file1.csv", "file2.xlsx"],
   "output_files": ["output.xlsx"]
-}`;
+}
+
+Start your response with { and end with }. Nothing else.`;
 
       // Call Netlify serverless function (avoids CORS issues)
       const response = await fetch('/.netlify/functions/generate', {
@@ -233,15 +237,23 @@ Respond ONLY with valid JSON in this exact format:
       // Parse JSON response
       let parsedResult;
       try {
-        // Extract JSON from response (in case Claude adds explanation text)
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          parsedResult = JSON.parse(jsonMatch[0]);
-        } else {
-          throw new Error('No JSON found in response');
+        // Try to parse the entire content first
+        try {
+          parsedResult = JSON.parse(content);
+        } catch (e) {
+          // If that fails, try to extract JSON from response (in case Claude adds explanation text)
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            parsedResult = JSON.parse(jsonMatch[0]);
+          } else {
+            console.error('Raw response:', content);
+            throw new Error('No JSON found in response. Check console for raw output.');
+          }
         }
       } catch (parseError) {
-        throw new Error('Failed to parse Claude response as JSON');
+        console.error('Parse error:', parseError);
+        console.error('Content:', content);
+        throw new Error(`Failed to parse Claude response: ${parseError.message}`);
       }
 
       // Validate response structure
