@@ -1,287 +1,197 @@
-# Alter-thon
+# ⚡ Alter-YX
 
-Convert Alteryx workflows to Python code using AI. A secure, fast, and reliable tool for data professionals transitioning from Alteryx to Python.
+Transform Alteryx workflows into Python pandas code using AI.
 
-## 🚀 Features
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/grosz99/alter_yx)
 
-- **Upload CSV/Excel files** - Drag & drop or browse to upload data files
-- **Natural language processing** - Describe your workflow in plain English
-- **Secure code generation** - AI generates safe, executable Python scripts
-- **Visual workflow diagrams** - See your data pipeline as a Mermaid diagram
-- **Instant download** - Get your Python script ready to run
-- **Security-first design** - Input validation, file size limits, and secure API calls
+## 🚀 Live Demo
 
-## 🛡️ Security Features
+**[Add your Netlify URL here after deployment]**
 
-- **Input validation** - All user inputs are validated and sanitized
-- **File type restrictions** - Only CSV and Excel files accepted
-- **Size limits** - 10MB maximum file size, 5000 character limit for descriptions
-- **Script validation** - Generated Python code is checked for dangerous operations
-- **CORS protection** - Proper cross-origin resource sharing configuration
-- **Content Security Policy** - XSS and injection attack prevention
-- **Request timeout** - 30-second timeout prevents hanging requests
+## 📋 What It Does
 
-## 🏗️ Tech Stack
+Alter-YX uses Claude AI to convert Alteryx workflow descriptions into clean, well-documented Python scripts using pandas. Simply describe your Alteryx workflow, and get production-ready Python code instantly.
 
-- **Backend**: FastAPI, Anthropic Claude API, Python
-- **Frontend**: React 18, Vite, Axios, Mermaid.js
-- **Deployment**: Vercel (both frontend and backend)
-- **Security**: Input validation, CSP headers, file restrictions
+### Features
 
-## 📁 Project Structure
+- 🤖 **AI-Powered Conversion**: Uses Claude 3.5 Sonnet for intelligent code generation
+- 📁 **File Upload Support**: Optionally upload CSV/Excel files for context
+- 📊 **Workflow Visualization**: Automatic Mermaid diagrams of your workflow
+- 🐍 **Clean Python Code**: Well-commented, production-ready pandas scripts
+- 🔒 **Secure**: Your API key is sent directly to Anthropic - never stored
+- ⬇️ **Easy Export**: Download scripts or copy to clipboard
+
+## 🛠️ How to Use
+
+1. **Get an Anthropic API Key**
+   Sign up at [console.anthropic.com](https://console.anthropic.com/) and create an API key
+
+2. **Visit the App**
+   Go to the live deployment URL
+
+3. **Enter Your API Key**
+   Paste your Anthropic API key (starts with `sk-ant-`)
+
+4. **Upload Files** (optional)
+   Upload CSV/Excel files for context
+
+5. **Describe Your Workflow**
+   Example: "Load sales.csv, filter for amounts over $1000, join with customers.csv on customer_id, calculate total revenue by region, and save to Excel"
+
+6. **Generate & Download**
+   Click "Generate Python Script" and download your code!
+
+## 📂 Project Structure
 
 ```
-alter-thon/
-├── backend/
-│   ├── knowledge/
-│   │   └── alteryx_mapping.py     # Alteryx to Python knowledge base
-│   ├── api/
-│   │   └── generate.py            # FastAPI endpoints with security
-│   ├── requirements.txt           # Python dependencies
-│   └── vercel.json               # Backend deployment config
-├── frontend/
+alter_yx/
+├── frontend/               # React + Vite frontend
 │   ├── src/
-│   │   ├── App.jsx               # Main React component
-│   │   ├── App.css               # Styles with responsive design
-│   │   ├── main.jsx              # React entry point
-│   │   └── index.html            # HTML template with security headers
-│   ├── package.json              # Node.js dependencies
-│   ├── vite.config.js            # Build configuration
-│   └── vercel.json               # Frontend deployment config
-└── README.md                     # This file
+│   │   ├── App.jsx        # Main application component
+│   │   ├── App.css        # Application styles
+│   │   └── main.jsx       # React entry point
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
+├── netlify/
+│   └── functions/
+│       └── generate.mjs   # Serverless API proxy for Anthropic
+├── netlify.toml           # Netlify build configuration
+├── .gitignore
+└── README.md
 ```
 
-## 🔧 Local Development
+## 🏗️ Local Development
 
 ### Prerequisites
 
-- Python 3.8+
-- Node.js 16+
+- Node.js 18+
+- npm or yarn
 - Anthropic API key
 
-### Backend Setup
+### Setup
 
-```bash
-cd backend
-pip install -r requirements.txt
-export ANTHROPIC_API_KEY=your_api_key_here
-uvicorn api.generate:app --reload --port 8000
-```
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/grosz99/alter_yx.git
+   cd alter_yx
+   ```
 
-### Frontend Setup
+2. **Install frontend dependencies**
+   ```bash
+   cd frontend
+   npm install
+   ```
 
-```bash
-cd frontend
-npm install
-echo "VITE_API_URL=http://localhost:8000" > .env
-npm run dev
-```
+3. **Run development server**
+   ```bash
+   npm run dev
+   ```
+   Open http://localhost:5173
 
-Open http://localhost:5173
+4. **Build for production**
+   ```bash
+   npm run build
+   ```
 
-## 🚀 Deployment to Vercel
+## 🌐 Deployment
 
-### Backend Deployment
+This project is configured for **Netlify** deployment with automatic serverless functions.
 
-```bash
-cd backend
-vercel login
-vercel --prod
-```
+### Deploy to Netlify
 
-After deployment, add your API key:
-```bash
-vercel env add ANTHROPIC_API_KEY
-# Enter your Anthropic API key when prompted
-```
+#### Option 1: One-Click Deploy
+Click the "Deploy to Netlify" button at the top of this README!
 
-### Frontend Deployment
+#### Option 2: Manual Deploy
 
-1. Update `frontend/vercel.json` with your backend URL:
-```json
-{
-  "rewrites": [
-    {
-      "source": "/api/:path*", 
-      "destination": "https://your-backend-url.vercel.app/api/:path*"
-    }
-  ]
-}
-```
+1. **Connect to GitHub**
+   - Go to [app.netlify.com](https://app.netlify.com/)
+   - Click "Add new site" → "Import an existing project"
+   - Select your GitHub repository: `grosz99/alter_yx`
 
-2. Deploy:
-```bash
-cd frontend
-vercel login
-vercel --prod
-```
+2. **Build Settings** (auto-detected from `netlify.toml`)
+   - **Branch to deploy**: `main`
+   - **Build command**: `cd frontend && npm install && npm run build`
+   - **Publish directory**: `frontend/dist`
+   - **Functions directory**: `netlify/functions`
 
-## 📖 Usage Guide
+3. **Deploy!**
+   Click "Deploy site" and you're done!
 
-### 1. Upload Data Files
-- Drag and drop CSV or Excel files (max 10MB each)
-- Supported formats: `.csv`, `.xlsx`, `.xls`
-- Multiple files supported for joins and unions
+### Auto-Deploy
 
-### 2. Describe Your Workflow
-Describe what you want to do in plain English. Examples:
+Every push to the `main` branch automatically triggers a new deployment on Netlify.
 
-- **"Filter sales > $1000, join with customers on customer_id, calculate total by region"**
-- **"Remove duplicates, fill missing values, export to Excel"**
-- **"Combine all CSVs, sort by date, calculate monthly totals"**
+## 🔧 Technical Stack
 
-### 3. Generate & Download
-- Click "Generate Python Script"
-- Review the workflow diagram
-- Copy or download the Python script
-- Run it locally with your data
+- **Frontend**: React 18, Vite 5
+- **Styling**: Custom CSS
+- **Visualization**: Mermaid.js
+- **AI**: Anthropic Claude 3.5 Sonnet (8192 max tokens)
+- **Serverless**: Netlify Functions
+- **Deployment**: Netlify
 
-## 🔍 Example Workflow
+## 📝 Common Alteryx Tool Mappings
 
-**Input**: "Load sales.csv, filter for amounts over $1000, join with customers.csv on customer_id, group by region, and save to Excel"
+| Alteryx Tool | Python Equivalent |
+|--------------|-------------------|
+| Input Data | `pd.read_csv()`, `pd.read_excel()` |
+| Output Data | `df.to_csv()`, `df.to_excel()` |
+| Filter | `df[condition]` |
+| Select | `df[['col1', 'col2']]` |
+| Join | `pd.merge(df1, df2, on='key')` |
+| Union | `pd.concat([df1, df2])` |
+| Formula | `df['new'] = calculation` |
+| Summarize | `df.groupby().agg()` |
+| Sort | `df.sort_values()` |
+| Unique | `df.drop_duplicates()` |
+| Cross Tab | `pd.pivot_table()` |
+| Data Cleansing | `str.strip()`, `str.upper()`, `fillna()` |
 
-**Generated Code**:
-```python
-import pandas as pd
-import numpy as np
-from pathlib import Path
+## 🔒 Security Features
 
-# Configuration
-INPUT_SALES = "sales.csv"
-INPUT_CUSTOMERS = "customers.csv"
-OUTPUT_FILE = "output/regional_summary.xlsx"
-
-try:
-    # Load data
-    print("Loading sales data...")
-    df_sales = pd.read_csv(INPUT_SALES)
-    print(f"Loaded {len(df_sales):,} sales records")
-    
-    print("Loading customer data...")
-    df_customers = pd.read_csv(INPUT_CUSTOMERS)
-    print(f"Loaded {len(df_customers):,} customer records")
-    
-    # Filter sales > $1000
-    df_filtered = df_sales[df_sales['amount'] > 1000]
-    print(f"Filtered to {len(df_filtered):,} high-value sales")
-    
-    # Join with customers
-    df_merged = pd.merge(df_filtered, df_customers, on='customer_id', how='inner')
-    print(f"Joined data: {len(df_merged):,} records")
-    
-    # Group by region
-    df_summary = df_merged.groupby('region').agg({
-        'amount': ['sum', 'count', 'mean']
-    }).round(2)
-    
-    # Save to Excel
-    Path(OUTPUT_FILE).parent.mkdir(parents=True, exist_ok=True)
-    df_summary.to_excel(OUTPUT_FILE)
-    print(f"Results saved to {OUTPUT_FILE}")
-    
-except Exception as e:
-    print(f"Error: {e}")
-```
-
-**Generated Diagram**:
-```mermaid
-graph TB
-    A[📂 Load: sales.csv] --> B[🔍 Filter: amount > 1000]
-    C[📂 Load: customers.csv] --> D[🔗 Join: on customer_id]
-    B --> D
-    D --> E[📊 Group by: region]
-    E --> F[💾 Save: regional_summary.xlsx]
-```
-
-## 🧪 Testing
-
-### Backend Testing
-```bash
-cd backend
-python -m pytest tests/ -v
-```
-
-### Frontend Testing
-```bash
-cd frontend
-npm test
-```
-
-### Security Testing
-```bash
-# Test file upload limits
-curl -X POST -F "files=@large_file.csv" -F "requirement=test" http://localhost:8000/api/generate
-
-# Test input validation
-curl -X POST -F "requirement=" http://localhost:8000/api/generate
-```
-
-## 🔒 Security Considerations
-
-### Input Validation
-- All file uploads are validated for type and size
-- User descriptions are sanitized to prevent injection attacks
-- Generated Python code is scanned for dangerous operations
-
-### API Security
-- Rate limiting (implement in production)
-- Request timeouts to prevent DoS
-- Comprehensive error handling without information leakage
-- Logging for security monitoring
-
-### Frontend Security
-- Content Security Policy headers
-- XSS protection
-- Secure file handling
-- Input sanitization
+- **Client-side API key**: Your Anthropic API key is sent directly to Anthropic, never stored on our servers
+- **Input validation**: File type and size restrictions (CSV/Excel, max 10MB)
+- **Sanitized inputs**: All user inputs are sanitized to prevent XSS attacks
+- **Serverless proxy**: CORS-safe proxy prevents direct browser-to-API calls
+- **No backend storage**: No databases, no data persistence
 
 ## 🐛 Troubleshooting
 
-### Common Issues
+### "Failed to parse Claude response as JSON"
+- Open browser console (F12) to see the raw response
+- The AI prompt has been optimized to return pure JSON
+- If issue persists, try simplifying your workflow description
 
-**"API configuration error"**
-- Make sure `ANTHROPIC_API_KEY` is set in your environment
-- Verify the API key is valid and has sufficient credits
+### "CORS error" or "Failed to fetch"
+- Make sure the Netlify deployment completed successfully
+- Check that the serverless function deployed correctly
+- Try refreshing the page
 
-**"File too large"**
-- Files must be under 10MB
-- Consider splitting large files or using data samples
-
-**"Invalid file type"**
-- Only CSV and Excel files are supported
-- Check file extension is `.csv`, `.xlsx`, or `.xls`
-
-**"Script generation failed"**
-- Check your internet connection
-- Verify the description is clear and specific
-- Try a simpler workflow description
-
-### Debug Mode
-
-Enable debug logging:
-```bash
-export LOG_LEVEL=DEBUG
-uvicorn api.generate:app --reload --log-level debug
-```
+### "Invalid API key"
+- Verify your Anthropic API key starts with `sk-ant-`
+- Get a new key at [console.anthropic.com](https://console.anthropic.com/)
+- Ensure you have sufficient API credits
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all security checks pass
-5. Submit a pull request
+Contributions are welcome! Feel free to:
+- Report bugs via GitHub Issues
+- Suggest features
+- Submit pull requests
+- Improve documentation
 
-## 📝 License
+## 📄 License
 
-MIT License - see LICENSE file for details
+MIT License - feel free to use this project however you'd like!
 
-## 🆘 Support
+## 🙏 Acknowledgments
 
-- **Issues**: Report bugs and feature requests on GitHub
-- **Documentation**: Check this README for setup and usage
-- **Security**: Report security issues privately to maintainers
+- Built with [Claude](https://www.anthropic.com/claude) by Anthropic
+- Powered by [Netlify](https://www.netlify.com/)
+- Created for Alteryx users transitioning to Python
 
 ---
 
-**Built with ❤️ using Claude AI • Powered by Anthropic API**
+**Note**: This is an unofficial tool and is not affiliated with Alteryx Inc.
