@@ -210,21 +210,15 @@ Respond ONLY with valid JSON in this exact format:
   "output_files": ["output.xlsx"]
 }`;
 
-      // Call Anthropic API directly from browser
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      // Call serverless proxy (avoids CORS issues)
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: {
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
           'content-type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20241022',
-          max_tokens: 4096,
-          messages: [{
-            role: 'user',
-            content: prompt
-          }]
+          apiKey: apiKey,
+          prompt: prompt
         })
       });
 
