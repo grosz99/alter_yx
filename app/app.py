@@ -22,9 +22,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Import from the knowledge directory relative to this file
-current_dir = os.path.dirname(__file__)
-sys.path.insert(0, current_dir)
-from knowledge.alteryx_mapping import get_alteryx_knowledge
+try:
+    current_dir = os.path.dirname(__file__)
+    sys.path.insert(0, current_dir)
+    from knowledge.alteryx_mapping import get_alteryx_knowledge
+    logger.info("Successfully imported alteryx_mapping")
+except Exception as e:
+    logger.error(f"Failed to import alteryx_mapping: {e}")
+    # Define a fallback
+    def get_alteryx_knowledge():
+        return "Basic Alteryx to Python knowledge base."
 
 app = FastAPI(
     title="Alter-thon API",
