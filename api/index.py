@@ -21,7 +21,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+# Import from the knowledge directory relative to this file
+current_dir = os.path.dirname(__file__)
+sys.path.insert(0, current_dir)
 from knowledge.alteryx_mapping import get_alteryx_knowledge
 
 app = FastAPI(
