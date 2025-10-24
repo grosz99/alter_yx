@@ -75,6 +75,37 @@ export default async (req, context) => {
       );
     }
 
+    // Server-side prompt length validation
+    const MAX_PROMPT_LENGTH = 10000;
+    if (prompt.length > MAX_PROMPT_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: 'Prompt exceeds maximum length' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Server-side dangerous pattern detection
+    const dangerousPatterns = [
+      /<script/i,
+      /javascript:/i,
+      /on\w+\s*=/i
+    ];
+
+    const hasDangerousContent = dangerousPatterns.some(pattern => pattern.test(prompt));
+
+    if (hasDangerousContent) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid characters detected' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     let response, data;
 
     // Call appropriate API based on provider

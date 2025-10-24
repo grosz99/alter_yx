@@ -94,6 +94,21 @@ function App() {
       .trim();
   };
 
+  // Detect prompt injection attempts
+  const detectPromptInjection = (input) => {
+    const dangerousPatterns = [
+      /ignore\s+(all\s+)?previous\s+instructions/i,
+      /you\s+are\s+now/i,
+      /system\s*(override|prompt)/i,
+      /forget\s+everything/i,
+      /new\s+instructions/i,
+      /disregard\s+.*\s*above/i,
+      /instead,?\s+output/i
+    ];
+
+    return dangerousPatterns.some(pattern => pattern.test(input));
+  };
+
   // Extract metadata from uploaded files (columns, row count, sample data)
   const extractFileMetadata = async (file) => {
     return new Promise((resolve, reject) => {
@@ -248,6 +263,12 @@ function App() {
 
     if (cleanedRequirement.length > 5000) {
       setError('Description is too long (maximum 5000 characters)');
+      return;
+    }
+
+    // Check for prompt injection
+    if (detectPromptInjection(cleanedRequirement)) {
+      setError('Invalid input detected. Please describe your data workflow only.');
       return;
     }
 
