@@ -381,7 +381,7 @@ Start your response with { and end with }. Nothing else.`;
             'content-type': 'application/json'
           },
           body: JSON.stringify({
-            model: 'claude-3-5-sonnet-20241022',
+            model: 'claude-sonnet-4-5-20250929',
             max_tokens: 8192,
             messages: [{
               role: 'user',

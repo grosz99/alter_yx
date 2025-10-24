@@ -16,7 +16,7 @@ Pycture uses AI (Anthropic Claude or OpenAI GPT-4) to convert Alteryx workflow d
 
 ### Features
 
-- 🤖 **Dual AI Support**: Choose between Anthropic Claude 3.5 Sonnet or OpenAI GPT-4
+- 🤖 **Dual AI Support**: Choose between Anthropic Claude Sonnet 4.5 or OpenAI GPT-4
 - 📁 **Smart File Analysis**: Upload CSV/Excel files (up to 100MB) for metadata extraction
 - 📋 **Step-by-Step Workflow**: See each transformation with corresponding code
 - 🐍 **Clean Python Code**: Well-commented, production-ready pandas scripts
@@ -130,7 +130,7 @@ Every push to the `main` branch automatically triggers a new deployment on Netli
 - **Frontend**: React 18, Vite 5
 - **Styling**: Custom CSS
 - **Visualization**: Mermaid.js
-- **AI**: Anthropic Claude 3.5 Sonnet (8192 max tokens)
+- **AI**: Anthropic Claude Sonnet 4.5 (8192 max tokens)
 - **Serverless**: Netlify Functions
 - **Deployment**: Netlify
 
