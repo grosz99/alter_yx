@@ -686,13 +686,93 @@ Start your response with { and end with }. Nothing else.`;
             </div>
 
             <div className="card" style={{ backgroundColor: '#f1f8f4', border: '2px solid #2e7d32' }}>
-              <h3>📝 Next Steps</h3>
-              <ol style={{ marginLeft: '20px', lineHeight: '1.8' }}>
-                <li>Download the Python script above</li>
-                <li>Ensure you have the input files in the same directory</li>
-                <li>Install required packages: <code style={{ background: '#e8f5e9', padding: '2px 6px', borderRadius: '3px' }}>pip install pandas numpy openpyxl</code></li>
-                <li>Run the script: <code style={{ background: '#e8f5e9', padding: '2px 6px', borderRadius: '3px' }}>python pycture_script.py</code></li>
-              </ol>
+              <h3 style={{ fontSize: '20px', marginBottom: '20px', color: '#1b5e20' }}>🚀 How to Run This Code on Your Computer (Super Easy Guide!)</h3>
+
+              <div style={{ marginBottom: '25px' }}>
+                <h4 style={{ fontSize: '16px', marginBottom: '10px', color: '#2e7d32', fontWeight: '600' }}>Step 1: Install Python (if you don't have it yet)</h4>
+                <ol style={{ marginLeft: '20px', lineHeight: '2', fontSize: '14px' }}>
+                  <li>Go to <a href="https://www.python.org/downloads/" target="_blank" rel="noopener noreferrer" style={{ color: '#2e7d32', fontWeight: '600' }}>python.org/downloads</a></li>
+                  <li>Click the big yellow "Download Python" button</li>
+                  <li>Run the downloaded file</li>
+                  <li><strong>IMPORTANT:</strong> Check the box that says <span style={{ background: '#fff9c4', padding: '2px 6px' }}>"Add Python to PATH"</span> before clicking Install</li>
+                  <li>Click "Install Now" and wait for it to finish</li>
+                </ol>
+              </div>
+
+              <div style={{ marginBottom: '25px' }}>
+                <h4 style={{ fontSize: '16px', marginBottom: '10px', color: '#2e7d32', fontWeight: '600' }}>Step 2: Install VSCode (Free Code Editor)</h4>
+                <ol style={{ marginLeft: '20px', lineHeight: '2', fontSize: '14px' }}>
+                  <li>Go to <a href="https://code.visualstudio.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#2e7d32', fontWeight: '600' }}>code.visualstudio.com</a></li>
+                  <li>Download and install VSCode for your computer (Windows/Mac)</li>
+                  <li>Open VSCode after installation</li>
+                  <li>Click the Extensions icon on the left sidebar (looks like 4 squares)</li>
+                  <li>Search for "Python" and install the official Python extension by Microsoft</li>
+                </ol>
+              </div>
+
+              <div style={{ marginBottom: '25px' }}>
+                <h4 style={{ fontSize: '16px', marginBottom: '10px', color: '#2e7d32', fontWeight: '600' }}>Step 3: Create Your Project Folder</h4>
+                <ol style={{ marginLeft: '20px', lineHeight: '2', fontSize: '14px' }}>
+                  <li>Create a new folder on your Desktop called <code style={{ background: '#e8f5e9', padding: '2px 6px', borderRadius: '3px' }}>my_python_project</code></li>
+                  <li>Inside that folder, create two more folders:
+                    <ul style={{ marginTop: '8px', marginLeft: '20px' }}>
+                      <li><code style={{ background: '#e8f5e9', padding: '2px 6px', borderRadius: '3px' }}>input_files</code> (put your CSV/Excel files here)</li>
+                      <li><code style={{ background: '#e8f5e9', padding: '2px 6px', borderRadius: '3px' }}>output_files</code> (results will save here)</li>
+                    </ul>
+                  </li>
+                  <li>Download the <strong>.py script</strong> above and save it in <code style={{ background: '#e8f5e9', padding: '2px 6px', borderRadius: '3px' }}>my_python_project</code> (not in the subfolders)</li>
+                </ol>
+              </div>
+
+              <div style={{ marginBottom: '25px' }}>
+                <h4 style={{ fontSize: '16px', marginBottom: '10px', color: '#2e7d32', fontWeight: '600' }}>Step 4: Install Required Libraries</h4>
+                <ol style={{ marginLeft: '20px', lineHeight: '2', fontSize: '14px' }}>
+                  <li>In VSCode, click "Terminal" in the top menu, then "New Terminal"</li>
+                  <li>A command window will appear at the bottom of VSCode</li>
+                  <li>Type this command and press Enter: <code style={{ background: '#1e1e1e', color: '#4ec9b0', padding: '4px 8px', borderRadius: '3px', fontFamily: 'monospace' }}>pip install pandas numpy openpyxl</code></li>
+                  <li>Wait for it to download and install (you'll see text scrolling - this is normal!)</li>
+                  <li>When you see a message like "Successfully installed..." you're done!</li>
+                </ol>
+              </div>
+
+              <div style={{ marginBottom: '25px' }}>
+                <h4 style={{ fontSize: '16px', marginBottom: '10px', color: '#2e7d32', fontWeight: '600' }}>Step 5: Put Your Data Files in the Right Place</h4>
+                <ol style={{ marginLeft: '20px', lineHeight: '2', fontSize: '14px' }}>
+                  <li>Look at the <strong>"Input Files Needed"</strong> list above</li>
+                  <li>Copy those exact files into your <code style={{ background: '#e8f5e9', padding: '2px 6px', borderRadius: '3px' }}>input_files</code> folder</li>
+                  <li>Make sure the filenames match exactly (including .csv or .xlsx)</li>
+                </ol>
+              </div>
+
+              <div style={{ marginBottom: '25px' }}>
+                <h4 style={{ fontSize: '16px', marginBottom: '10px', color: '#2e7d32', fontWeight: '600' }}>Step 6: Run Your Python Script!</h4>
+                <ol style={{ marginLeft: '20px', lineHeight: '2', fontSize: '14px' }}>
+                  <li>In VSCode, open the downloaded Python script (the .py file)</li>
+                  <li>Look for the green ▶️ "Run" button in the top-right corner of VSCode</li>
+                  <li>Click it!</li>
+                  <li>The Terminal at the bottom will show you what's happening</li>
+                  <li>When you see "Workflow completed successfully" - you're done! 🎉</li>
+                  <li>Check your <code style={{ background: '#e8f5e9', padding: '2px 6px', borderRadius: '3px' }}>output_files</code> folder for your results</li>
+                </ol>
+              </div>
+
+              <div style={{ background: '#fff9c4', padding: '15px', borderRadius: '8px', border: '2px solid #f9a825' }}>
+                <h4 style={{ fontSize: '15px', marginBottom: '10px', color: '#f57f17', fontWeight: '600' }}>⚠️ Troubleshooting Common Issues:</h4>
+                <ul style={{ marginLeft: '20px', lineHeight: '2', fontSize: '13px' }}>
+                  <li><strong>"Python is not recognized..."</strong> → You forgot to check "Add Python to PATH" during installation. Uninstall and reinstall Python with that box checked!</li>
+                  <li><strong>"No module named 'pandas'"</strong> → Run the pip install command again from Step 4</li>
+                  <li><strong>"File not found"</strong> → Your input files aren't in the right folder, or the names don't match exactly</li>
+                  <li><strong>"Permission denied"</strong> → Close Excel if you have the file open, then try again</li>
+                  <li><strong>Script runs but no output</strong> → Check the Terminal for error messages in red text</li>
+                </ul>
+              </div>
+
+              <div style={{ marginTop: '20px', padding: '15px', background: '#e3f2fd', borderRadius: '8px', border: '2px solid #2196f3' }}>
+                <p style={{ fontSize: '14px', margin: 0, lineHeight: '1.8' }}>
+                  <strong>💡 Pro Tip:</strong> Once you get it working once, you can change the input files and run the script again!
+                  Just replace the files in <code style={{ background: '#fff', padding: '2px 6px', borderRadius: '3px' }}>input_files</code> and click the green Run button in VSCode again.
+                </p>
+              </div>
             </div>
           </div>
         )}
