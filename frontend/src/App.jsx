@@ -504,7 +504,7 @@ Start your response with { and end with }. Nothing else.`;
               style={{ width: '100%', padding: '12px', fontSize: '14px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd' }}
             />
             <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-              🔒 Your API key is sent directly to {provider === 'anthropic' ? 'Anthropic' : 'OpenAI'} and never stored.{' '}
+              🔒 Your API key is securely transmitted to {provider === 'anthropic' ? 'Anthropic' : 'OpenAI'} via our proxy. Keys are not stored in any database but may appear in temporary server logs.{' '}
               <a
                 href={provider === 'anthropic' ? 'https://console.anthropic.com/' : 'https://platform.openai.com/api-keys'}
                 target="_blank"
@@ -697,7 +697,7 @@ Start your response with { and end with }. Nothing else.`;
         <footer className="footer">
           <p>Built with ❤️ using AI • Supports Anthropic Claude & OpenAI GPT-4</p>
           <p style={{ fontSize: '11px', color: '#999', marginTop: '5px' }}>
-            Client-side application - your data and API key never touch our servers
+            Your data is processed client-side. API keys are proxied securely but may appear in server logs. We do not store keys or generated code.
           </p>
         </footer>
       </div>

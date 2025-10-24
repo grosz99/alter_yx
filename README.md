@@ -1,8 +1,10 @@
-# ⚡ Alter-YX
+# 📊 Pycture
 
 Transform Alteryx workflows into Python pandas code using AI.
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/grosz99/alter_yx)
+
+> ⚠️ **Beta Software**: Pycture is currently in beta. See [Privacy & Security](#privacy--security) for data handling details.
 
 ## 🚀 Live Demo
 
@@ -10,15 +12,15 @@ Transform Alteryx workflows into Python pandas code using AI.
 
 ## 📋 What It Does
 
-Alter-YX uses Claude AI to convert Alteryx workflow descriptions into clean, well-documented Python scripts using pandas. Simply describe your Alteryx workflow, and get production-ready Python code instantly.
+Pycture uses AI (Anthropic Claude or OpenAI GPT-4) to convert Alteryx workflow descriptions into clean, well-documented Python scripts using pandas. Simply describe your Alteryx workflow, and get production-ready Python code instantly.
 
 ### Features
 
-- 🤖 **AI-Powered Conversion**: Uses Claude 3.5 Sonnet for intelligent code generation
-- 📁 **File Upload Support**: Optionally upload CSV/Excel files for context
-- 📊 **Workflow Visualization**: Automatic Mermaid diagrams of your workflow
+- 🤖 **Dual AI Support**: Choose between Anthropic Claude 3.5 Sonnet or OpenAI GPT-4
+- 📁 **Smart File Analysis**: Upload CSV/Excel files (up to 100MB) for metadata extraction
+- 📋 **Step-by-Step Workflow**: See each transformation with corresponding code
 - 🐍 **Clean Python Code**: Well-commented, production-ready pandas scripts
-- 🔒 **Secure**: Your API key is sent directly to Anthropic - never stored
+- 🔒 **Bring Your Own Key**: Use your own API key (see privacy details below)
 - ⬇️ **Easy Export**: Download scripts or copy to clipboard
 
 ## 🛠️ How to Use
@@ -182,16 +184,45 @@ Contributions are welcome! Feel free to:
 - Submit pull requests
 - Improve documentation
 
+## 🔒 Privacy & Security
+
+### How Your Data is Handled
+
+- **API Keys**: Your API key is transmitted through our serverless proxy to Anthropic/OpenAI via HTTPS. Keys are **not stored** in any database, but may appear in temporary server execution logs for debugging purposes.
+
+- **File Uploads**: Files are processed **entirely in your browser**. Only metadata (column names, row count from first 50KB) is extracted. Full file contents never leave your device.
+
+- **Prompts & Code**: Your workflow descriptions and generated code pass through our Netlify serverless functions but are **not saved** to any database or persistent storage.
+
+- **No Tracking**: We do not use analytics, cookies, or tracking pixels. Your usage is private.
+
+### Security Measures
+
+- ✅ HTTPS encryption for all communications
+- ✅ Content Security Policy (CSP) headers
+- ✅ Input sanitization & prompt injection detection
+- ✅ Server-side validation of all requests
+- ✅ No data persistence or logging to databases
+
+### Important Limitations
+
+⚠️ **This is beta software**. While we've implemented security best practices:
+- API keys transit through serverless functions (may appear in logs)
+- Rate limiting is not yet implemented
+- Not recommended for highly sensitive data workflows
+
+For detailed security information, see [SECURITY_PENTEST.md](SECURITY_PENTEST.md) and [PRODUCTION_ACTION_PLAN.md](PRODUCTION_ACTION_PLAN.md).
+
 ## 📄 License
 
 MIT License - feel free to use this project however you'd like!
 
 ## 🙏 Acknowledgments
 
-- Built with [Claude](https://www.anthropic.com/claude) by Anthropic
+- Built with [Claude](https://www.anthropic.com/claude) by Anthropic & [OpenAI GPT-4](https://openai.com/)
 - Powered by [Netlify](https://www.netlify.com/)
 - Created for Alteryx users transitioning to Python
 
 ---
 
-**Note**: This is an unofficial tool and is not affiliated with Alteryx Inc.
+**Note**: This is an unofficial tool and is not affiliated with Alteryx Inc. or Alteryx.
