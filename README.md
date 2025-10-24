@@ -12,11 +12,11 @@ Transform Alteryx workflows into Python pandas code using AI.
 
 ## 📋 What It Does
 
-Pycture uses AI (Anthropic Claude or OpenAI GPT-4) to convert Alteryx workflow descriptions into clean, well-documented Python scripts using pandas. Simply describe your Alteryx workflow, and get production-ready Python code instantly.
+Pycture uses AI (Anthropic Claude Sonnet 4.5) to convert Alteryx workflow descriptions into clean, well-documented Python scripts using pandas. Simply describe your Alteryx workflow, and get production-ready Python code instantly.
 
 ### Features
 
-- 🤖 **Dual AI Support**: Choose between Anthropic Claude Sonnet 4.5 or OpenAI GPT-4
+- 🤖 **Powered by Claude Sonnet 4.5**: Latest and most capable Claude model
 - 📁 **Smart File Analysis**: Upload CSV/Excel files (up to 100MB) for metadata extraction
 - 📋 **Step-by-Step Workflow**: See each transformation with corresponding code
 - 🐍 **Clean Python Code**: Well-commented, production-ready pandas scripts
@@ -224,7 +224,7 @@ MIT License - feel free to use this project however you'd like!
 
 ## 🙏 Acknowledgments
 
-- Built with [Claude](https://www.anthropic.com/claude) by Anthropic & [OpenAI GPT-4](https://openai.com/)
+- Built with [Claude](https://www.anthropic.com/claude) by Anthropic & [Claude Sonnet 4.5](https://openai.com/)
 - Powered by [Netlify](https://www.netlify.com/)
 - Created for Alteryx users transitioning to Python
 

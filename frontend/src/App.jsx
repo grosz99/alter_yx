@@ -56,7 +56,6 @@ function App() {
   const [fileMetadata, setFileMetadata] = useState([]);
   const [requirement, setRequirement] = useState('');
   const [apiKey, setApiKey] = useState('');
-  const [provider, setProvider] = useState('anthropic'); // 'anthropic' or 'openai'
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -277,14 +276,9 @@ function App() {
       return;
     }
 
-    // Validate API key format based on provider
-    if (provider === 'anthropic' && !apiKey.startsWith('sk-ant-')) {
+    // Validate API key format
+    if (!apiKey.startsWith('sk-ant-')) {
       setError('Invalid Anthropic API key format. Should start with sk-ant-');
-      return;
-    }
-
-    if (provider === 'openai' && !apiKey.startsWith('sk-')) {
-      setError('Invalid OpenAI API key format. Should start with sk-');
       return;
     }
 
@@ -368,65 +362,31 @@ Use this exact format:
 
 Start your response with { and end with }. Nothing else.`;
 
-      // Call AI API directly from browser (no proxy, no logging)
-      let response, data, content;
+      // Call Anthropic API directly from browser (no proxy, no logging)
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5-20250929',
+          max_tokens: 8192,
+          messages: [{
+            role: 'user',
+            content: prompt
+          }]
+        })
+      });
 
-      if (provider === 'anthropic') {
-        // Direct call to Anthropic API
-        response = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-            'content-type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-5-20250929',
-            max_tokens: 8192,
-            messages: [{
-              role: 'user',
-              content: prompt
-            }]
-          })
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error?.message || `Anthropic API error: ${response.status}`);
-        }
-
-        data = await response.json();
-        content = data.content[0].text;
-
-      } else if (provider === 'openai') {
-        // Direct call to OpenAI API
-        response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: 'gpt-4-turbo-preview',
-            messages: [{
-              role: 'user',
-              content: prompt
-            }],
-            max_tokens: 8192,
-            temperature: 0.7
-          })
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error?.message || `OpenAI API error: ${response.status}`);
-        }
-
-        data = await response.json();
-        content = data.choices[0].message.content;
-      } else {
-        throw new Error('Invalid provider');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || `Anthropic API error: ${response.status}`);
       }
+
+      const data = await response.json();
+      const content = data.content[0].text;
 
       // Parse JSON response
       let parsedResult;
@@ -536,49 +496,7 @@ Start your response with { and end with }. Nothing else.`;
         </header>
 
         <div className="card">
-          <h2>🔑 API Configuration</h2>
-
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ fontSize: '14px', color: '#333', fontWeight: '500', marginBottom: '8px', display: 'block' }}>
-              Select AI Provider
-            </label>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                onClick={() => setProvider('anthropic')}
-                style={{
-                  flex: 1,
-                  padding: '10px',
-                  background: provider === 'anthropic' ? '#2e7d32' : '#f5f5f5',
-                  color: provider === 'anthropic' ? 'white' : '#333',
-                  border: provider === 'anthropic' ? '2px solid #2e7d32' : '2px solid #e0e0e0',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                  fontSize: '14px',
-                  transition: 'all 0.2s'
-                }}
-              >
-                Anthropic Claude
-              </button>
-              <button
-                onClick={() => setProvider('openai')}
-                style={{
-                  flex: 1,
-                  padding: '10px',
-                  background: provider === 'openai' ? '#2e7d32' : '#f5f5f5',
-                  color: provider === 'openai' ? 'white' : '#333',
-                  border: provider === 'openai' ? '2px solid #2e7d32' : '2px solid #e0e0e0',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                  fontSize: '14px',
-                  transition: 'all 0.2s'
-                }}
-              >
-                OpenAI GPT-4
-              </button>
-            </div>
-          </div>
+          <h2>🔑 Anthropic Claude API Key</h2>
 
           <div>
             <label style={{ fontSize: '14px', color: '#333', fontWeight: '500', marginBottom: '8px', display: 'block' }}>
@@ -588,13 +506,13 @@ Start your response with { and end with }. Nothing else.`;
               type="password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder={provider === 'anthropic' ? 'sk-ant-api03-...' : 'sk-...'}
+              placeholder="sk-ant-api03-..."
               style={{ width: '100%', padding: '12px', fontSize: '14px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd' }}
             />
             <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-              🔒 Your API key is sent directly from your browser to {provider === 'anthropic' ? 'Anthropic' : 'OpenAI'}. We never see or log your API key.{' '}
+              🔒 Your API key is sent directly from your browser to Anthropic. We never see or log your API key.{' '}
               <a
-                href={provider === 'anthropic' ? 'https://console.anthropic.com/' : 'https://platform.openai.com/api-keys'}
+                href="https://console.anthropic.com/"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -702,7 +620,7 @@ Start your response with { and end with }. Nothing else.`;
         {loading && (
           <div className="card loading-card">
             <div className="spinner"></div>
-            <p>Generating your Python script with {provider === 'anthropic' ? 'Claude AI' : 'GPT-4'}...</p>
+            <p>Generating your Python script with Claude Sonnet 4.5...</p>
             <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>This may take 10-30 seconds</p>
           </div>
         )}
@@ -783,7 +701,7 @@ Start your response with { and end with }. Nothing else.`;
         )}
 
         <footer className="footer">
-          <p>Built with ❤️ using AI • Supports Anthropic Claude & OpenAI GPT-4</p>
+          <p>Built with ❤️ using Anthropic Claude Sonnet 4.5</p>
           <p style={{ fontSize: '11px', color: '#999', marginTop: '5px' }}>
             Fully client-side application. Your API key and data never touch our servers. We do not store or log anything.
           </p>
