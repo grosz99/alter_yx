@@ -362,27 +362,21 @@ Use this exact format:
 
 Start your response with { and end with }. Nothing else.`;
 
-      // Call Anthropic API directly from browser (no proxy, no logging)
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      // Call via Netlify function to avoid CORS issues
+      const response = await fetch('/.netlify/functions/generate', {
         method: 'POST',
         headers: {
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
           'content-type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-5-20250929',
-          max_tokens: 8192,
-          messages: [{
-            role: 'user',
-            content: prompt
-          }]
+          apiKey: apiKey,
+          prompt: prompt
         })
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || `Anthropic API error: ${response.status}`);
+        throw new Error(errorData.error?.message || `API error: ${response.status}`);
       }
 
       const data = await response.json();
@@ -513,7 +507,7 @@ Start your response with { and end with }. Nothing else.`;
               style={{ width: '100%', padding: '12px', fontSize: '14px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd' }}
             />
             <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-              🔒 Your API key is sent directly from your browser to Anthropic. We never see or log your API key.{' '}
+              🔒 Your API key is sent securely to Anthropic via our proxy. We do not store or log your API key.{' '}
               <a
                 href="https://console.anthropic.com/"
                 target="_blank"
@@ -706,7 +700,7 @@ Start your response with { and end with }. Nothing else.`;
         <footer className="footer">
           <p>Built with ❤️ using Anthropic Claude Sonnet 4.5</p>
           <p style={{ fontSize: '11px', color: '#999', marginTop: '5px' }}>
-            Fully client-side application. Your API key and data never touch our servers. We do not store or log anything.
+            Your API key is only used to call Anthropic's API. We do not store or log your API key or data.
           </p>
         </footer>
       </div>
