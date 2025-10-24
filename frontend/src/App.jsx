@@ -440,8 +440,11 @@ Start your response with { and end with }. Nothing else.`;
     } catch (err) {
       console.error('Generation error:', err);
 
-      if (err.message.includes('401')) {
-        setError('Invalid API key. Please check your API key.');
+      // Handle "Failed to fetch" - network/CORS errors
+      if (err.message === 'Failed to fetch') {
+        setError('Network error: Could not connect to Anthropic API. Please check: (1) Your internet connection, (2) Your API key is valid, (3) Try refreshing the page. If the problem persists, your network may be blocking API requests.');
+      } else if (err.message.includes('401') || err.message.includes('authentication')) {
+        setError('Invalid API key. Please check your API key at console.anthropic.com');
       } else if (err.message.includes('429')) {
         setError('Rate limit exceeded. Please wait a moment and try again.');
       } else if (err.message.includes('400')) {
