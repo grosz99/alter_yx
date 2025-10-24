@@ -55,10 +55,18 @@ Always include:
 
 ## MERMAID DIAGRAM
 
-Generate workflow visualization using:
+Generate workflow visualization using valid Mermaid syntax:
+- Use simple node IDs: A, B, C, D, etc.
+- Use square brackets for node labels: A[Load CSV]
+- Use --> for arrows
+- Keep labels short and clear
+- Escape special characters in labels
+
+Example:
 graph TB
-    A[📂 Load: file.csv] --> B[🔍 Filter]
-    B --> C[💾 Save: output.xlsx]
+    A[Load CSV] --> B[Filter Data]
+    B --> C[Group By Category]
+    C --> D[Save Results]
 `;
 
 function App() {
@@ -309,16 +317,24 @@ CRITICAL: You must respond with ONLY valid JSON. No explanatory text before or a
 Use this exact format:
 {
   "script": "complete Python code here",
-  "diagram": "mermaid diagram code starting with 'graph TB'",
+  "diagram": "graph TB\\n    A[Load CSV] --> B[Filter Data]\\n    B --> C[Save Output]",
   "step_codes": {
-    "step_id_1": "code snippet for this step",
-    "step_id_2": "code snippet for this step"
+    "A": "df = pd.read_csv('data.csv')",
+    "B": "df = df[df['amount'] > 1000]",
+    "C": "df.to_csv('output.csv')"
   },
   "input_files": ["file1.csv", "file2.xlsx"],
   "output_files": ["output.xlsx"]
 }
 
-IMPORTANT: For step_codes, use the node IDs from your mermaid diagram (A, B, C, etc.) as keys, and provide the relevant code snippet (2-3 lines max) as values.
+CRITICAL MERMAID RULES:
+- Start with "graph TB"
+- Use simple IDs: A, B, C, D (no special characters)
+- Use square brackets ONLY: A[Description]
+- Do NOT use parentheses, quotes, or colons in node labels
+- Use --> for arrows
+- Each step on new line with proper indentation
+- For step_codes, use node IDs (A, B, C) as keys
 
 Start your response with { and end with }. Nothing else.`;
 
@@ -420,7 +436,17 @@ Start your response with { and end with }. Nothing else.`;
             });
           } catch (err) {
             console.error('Mermaid rendering error:', err);
-            diagramElement.innerHTML = '<p>Diagram rendering failed</p>';
+            console.error('Diagram content:', parsedResult.diagram);
+            diagramElement.innerHTML = `
+              <div style="padding: 20px; text-align: center; color: #c00;">
+                <p style="font-weight: 600; margin-bottom: 10px;">⚠️ Diagram rendering failed</p>
+                <p style="font-size: 12px; color: #666;">The AI generated invalid diagram syntax. The Python script is still available below.</p>
+                <details style="margin-top: 15px; text-align: left;">
+                  <summary style="cursor: pointer; color: #2e7d32;">Show diagram code</summary>
+                  <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 11px; overflow-x: auto;">${parsedResult.diagram}</pre>
+                </details>
+              </div>
+            `;
           }
         }
       }, 100);
