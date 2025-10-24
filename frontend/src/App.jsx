@@ -384,23 +384,38 @@ Start your response with { and end with }. Nothing else.`;
             mermaid.run({ nodes: [diagramElement] }).then(() => {
               // Add tooltips to each node
               if (parsedResult.step_codes) {
-                Object.keys(parsedResult.step_codes).forEach(nodeId => {
-                  const nodeElement = diagramElement.querySelector(`#flowchart-${nodeId}-`);
-                  if (nodeElement) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'workflow-step';
-                    wrapper.title = parsedResult.step_codes[nodeId];
+                // Wait a bit for mermaid to fully render
+                setTimeout(() => {
+                  // Find all node rectangles in the SVG
+                  const svgNodes = diagramElement.querySelectorAll('.node');
 
-                    const tooltip = document.createElement('div');
-                    tooltip.className = 'code-tooltip';
-                    tooltip.textContent = parsedResult.step_codes[nodeId];
+                  svgNodes.forEach((node) => {
+                    // Get the node ID from the node element
+                    const nodeId = node.id;
 
-                    // Wrap the node
-                    nodeElement.parentNode.insertBefore(wrapper, nodeElement);
-                    wrapper.appendChild(nodeElement);
-                    wrapper.appendChild(tooltip);
-                  }
-                });
+                    // Try to match the node ID with our step codes
+                    Object.keys(parsedResult.step_codes).forEach(stepId => {
+                      if (nodeId.includes(stepId) || nodeId.includes(`flowchart-${stepId}-`)) {
+                        // Add CSS class for styling
+                        node.classList.add('workflow-step');
+
+                        // Create custom tooltip div
+                        const tooltip = document.createElement('div');
+                        tooltip.className = 'code-tooltip';
+                        tooltip.textContent = parsedResult.step_codes[stepId];
+                        node.appendChild(tooltip);
+
+                        // Add mouse move listener to position tooltip
+                        node.addEventListener('mouseenter', function(e) {
+                          const rect = node.getBoundingClientRect();
+                          tooltip.style.left = `${rect.left + rect.width / 2}px`;
+                          tooltip.style.top = `${rect.top - 10}px`;
+                          tooltip.style.transform = 'translate(-50%, -100%)';
+                        });
+                      }
+                    });
+                  });
+                }, 200);
               }
             });
           } catch (err) {
