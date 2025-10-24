@@ -1,8 +1,5 @@
 import { useState } from 'react';
-import mermaid from 'mermaid';
 import './App.css';
-
-mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
 
 // Alteryx knowledge base embedded in frontend
 const ALTERYX_KNOWLEDGE = `# ALTERYX TO PYTHON CONVERSION GUIDE
@@ -52,21 +49,6 @@ Always include:
 4. Error handling (try/except)
 5. Progress messages (print statements)
 6. Create output directories (Path().mkdir())
-
-## MERMAID DIAGRAM
-
-Generate workflow visualization using valid Mermaid syntax:
-- Use simple node IDs: A, B, C, D, etc.
-- Use square brackets for node labels: A[Load CSV]
-- Use --> for arrows
-- Keep labels short and clear
-- Escape special characters in labels
-
-Example:
-graph TB
-    A[Load CSV] --> B[Filter Data]
-    B --> C[Group By Category]
-    C --> D[Save Results]
 `;
 
 function App() {
@@ -307,8 +289,7 @@ Generate a complete Python script that:
 4. Saves the output appropriately
 
 Also provide:
-- A Mermaid diagram showing the workflow
-- Code snippets for each step in the workflow (for tooltips)
+- A step-by-step explanation with code snippets
 - List of input files needed
 - List of output files that will be created
 
@@ -317,24 +298,15 @@ CRITICAL: You must respond with ONLY valid JSON. No explanatory text before or a
 Use this exact format:
 {
   "script": "complete Python code here",
-  "diagram": "graph TB\\n    A[Load CSV] --> B[Filter Data]\\n    B --> C[Save Output]",
-  "step_codes": {
-    "A": "df = pd.read_csv('data.csv')",
-    "B": "df = df[df['amount'] > 1000]",
-    "C": "df.to_csv('output.csv')"
-  },
+  "steps": [
+    {"description": "Load Superstore CSV", "code": "df = pd.read_csv('Superstore.csv')"},
+    {"description": "Filter for South Region", "code": "df = df[df['region'] == 'South']"},
+    {"description": "Group by subcategory and sum sales", "code": "df.groupby('subcategory')['sales'].sum()"},
+    {"description": "Save results to CSV", "code": "df.to_csv('results.csv', index=False)"}
+  ],
   "input_files": ["file1.csv", "file2.xlsx"],
   "output_files": ["output.xlsx"]
 }
-
-CRITICAL MERMAID RULES:
-- Start with "graph TB"
-- Use simple IDs: A, B, C, D (no special characters)
-- Use square brackets ONLY: A[Description]
-- Do NOT use parentheses, quotes, or colons in node labels
-- Use --> for arrows
-- Each step on new line with proper indentation
-- For step_codes, use node IDs (A, B, C) as keys
 
 Start your response with { and end with }. Nothing else.`;
 
@@ -382,7 +354,7 @@ Start your response with { and end with }. Nothing else.`;
       }
 
       // Validate response structure
-      const requiredFields = ['script', 'diagram', 'step_codes', 'input_files', 'output_files'];
+      const requiredFields = ['script', 'steps', 'input_files', 'output_files'];
       for (const field of requiredFields) {
         if (!(field in parsedResult)) {
           throw new Error(`Missing required field: ${field}`);
@@ -390,66 +362,6 @@ Start your response with { and end with }. Nothing else.`;
       }
 
       setResult(parsedResult);
-
-      // Render Mermaid diagram with tooltips
-      setTimeout(() => {
-        const diagramElement = document.getElementById('mermaid-diagram');
-        if (diagramElement && parsedResult.diagram) {
-          try {
-            diagramElement.innerHTML = parsedResult.diagram;
-            mermaid.run({ nodes: [diagramElement] }).then(() => {
-              // Add tooltips to each node
-              if (parsedResult.step_codes) {
-                // Wait a bit for mermaid to fully render
-                setTimeout(() => {
-                  // Find all node rectangles in the SVG
-                  const svgNodes = diagramElement.querySelectorAll('.node');
-
-                  svgNodes.forEach((node) => {
-                    // Get the node ID from the node element
-                    const nodeId = node.id;
-
-                    // Try to match the node ID with our step codes
-                    Object.keys(parsedResult.step_codes).forEach(stepId => {
-                      if (nodeId.includes(stepId) || nodeId.includes(`flowchart-${stepId}-`)) {
-                        // Add CSS class for styling
-                        node.classList.add('workflow-step');
-
-                        // Create custom tooltip div
-                        const tooltip = document.createElement('div');
-                        tooltip.className = 'code-tooltip';
-                        tooltip.textContent = parsedResult.step_codes[stepId];
-                        node.appendChild(tooltip);
-
-                        // Add mouse move listener to position tooltip
-                        node.addEventListener('mouseenter', function(e) {
-                          const rect = node.getBoundingClientRect();
-                          tooltip.style.left = `${rect.left + rect.width / 2}px`;
-                          tooltip.style.top = `${rect.top - 10}px`;
-                          tooltip.style.transform = 'translate(-50%, -100%)';
-                        });
-                      }
-                    });
-                  });
-                }, 200);
-              }
-            });
-          } catch (err) {
-            console.error('Mermaid rendering error:', err);
-            console.error('Diagram content:', parsedResult.diagram);
-            diagramElement.innerHTML = `
-              <div style="padding: 20px; text-align: center; color: #c00;">
-                <p style="font-weight: 600; margin-bottom: 10px;">⚠️ Diagram rendering failed</p>
-                <p style="font-size: 12px; color: #666;">The AI generated invalid diagram syntax. The Python script is still available below.</p>
-                <details style="margin-top: 15px; text-align: left;">
-                  <summary style="cursor: pointer; color: #2e7d32;">Show diagram code</summary>
-                  <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 11px; overflow-x: auto;">${parsedResult.diagram}</pre>
-                </details>
-              </div>
-            `;
-          }
-        }
-      }, 100);
 
       // Smooth scroll to results
       setTimeout(() => {
@@ -693,11 +605,18 @@ Start your response with { and end with }. Nothing else.`;
             </div>
 
             <div className="card">
-              <h2>📊 Workflow Visualization</h2>
-              <p style={{ fontSize: '13px', color: '#666', marginBottom: '15px' }}>
-                💡 Hover over each step to see the corresponding code
-              </p>
-              <div id="mermaid-diagram" className="mermaid-container"></div>
+              <h2>📋 Workflow Steps</h2>
+              <div className="workflow-steps">
+                {result.steps && result.steps.map((step, index) => (
+                  <div key={index} className="workflow-step-item">
+                    <div className="step-number">{index + 1}</div>
+                    <div className="step-content">
+                      <div className="step-description">{step.description}</div>
+                      <code className="step-code">{step.code}</code>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="card">
