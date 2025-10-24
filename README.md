@@ -188,30 +188,35 @@ Contributions are welcome! Feel free to:
 
 ### How Your Data is Handled
 
-- **API Keys**: Your API key is transmitted through our serverless proxy to Anthropic/OpenAI via HTTPS. Keys are **not stored** in any database, but may appear in temporary server execution logs for debugging purposes.
+- **API Keys**: Your API key is sent **directly from your browser** to Anthropic/OpenAI via HTTPS. We never see, receive, or log your API key. It stays in your browser memory only.
 
 - **File Uploads**: Files are processed **entirely in your browser**. Only metadata (column names, row count from first 50KB) is extracted. Full file contents never leave your device.
 
-- **Prompts & Code**: Your workflow descriptions and generated code pass through our Netlify serverless functions but are **not saved** to any database or persistent storage.
+- **Prompts & Code**: Your workflow descriptions are sent directly to the AI provider. Generated code is received directly in your browser. **Nothing passes through our servers.**
 
-- **No Tracking**: We do not use analytics, cookies, or tracking pixels. Your usage is private.
+- **No Tracking**: We do not use analytics, cookies, or tracking pixels. Your usage is completely private.
 
 ### Security Measures
 
-- ✅ HTTPS encryption for all communications
-- ✅ Content Security Policy (CSP) headers
-- ✅ Input sanitization & prompt injection detection
-- ✅ Server-side validation of all requests
-- ✅ No data persistence or logging to databases
+- ✅ **Direct API Calls**: No proxy - your key goes straight to Anthropic/OpenAI
+- ✅ **Client-Side Rate Limiting**: 10 requests per minute protection
+- ✅ **Enhanced Prompt Injection Detection**: Unicode normalization, 12+ pattern checks
+- ✅ **AI Output Validation**: Blocks dangerous code imports (os, subprocess, etc.)
+- ✅ **HTTPS Encryption**: All communications encrypted end-to-end
+- ✅ **Content Security Policy**: CSP headers protect against XSS
+- ✅ **No Data Persistence**: We don't store anything - ever
 
-### Important Limitations
+### Architecture
 
-⚠️ **This is beta software**. While we've implemented security best practices:
-- API keys transit through serverless functions (may appear in logs)
-- Rate limiting is not yet implemented
-- Not recommended for highly sensitive data workflows
+```
+Your Browser → Direct HTTPS → Anthropic/OpenAI API
+     ↑                              ↓
+     └────────── Response ──────────┘
 
-For detailed security information, see [SECURITY_PENTEST.md](SECURITY_PENTEST.md) and [PRODUCTION_ACTION_PLAN.md](PRODUCTION_ACTION_PLAN.md).
+(Our servers never involved - fully client-side!)
+```
+
+For detailed security information, see [SECURITY_PENTEST.md](SECURITY_PENTEST.md) and [SECURITY_AUDIT_SUMMARY.md](SECURITY_AUDIT_SUMMARY.md).
 
 ## 📄 License
 

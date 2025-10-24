@@ -62,6 +62,11 @@ function App() {
   const [error, setError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
 
+  // Rate limiting state
+  const [requestHistory, setRequestHistory] = useState([]);
+  const RATE_LIMIT = 10; // requests
+  const RATE_WINDOW = 60000; // 1 minute in milliseconds
+
   // Validate file types and sizes
   const validateFile = (file) => {
     const allowedTypes = [
@@ -94,19 +99,37 @@ function App() {
       .trim();
   };
 
-  // Detect prompt injection attempts
+  // Detect prompt injection attempts (enhanced)
   const detectPromptInjection = (input) => {
+    // Normalize input to catch Unicode and HTML entity bypasses
+    const normalized = input
+      .normalize('NFKD') // Normalize Unicode
+      .replace(/&nbsp;/gi, ' ') // HTML entities
+      .replace(/[\u200B-\u200D\uFEFF]/g, '') // Zero-width characters
+      .toLowerCase();
+
     const dangerousPatterns = [
-      /ignore\s+(all\s+)?previous\s+instructions/i,
-      /you\s+are\s+now/i,
-      /system\s*(override|prompt)/i,
-      /forget\s+everything/i,
-      /new\s+instructions/i,
-      /disregard\s+.*\s*above/i,
-      /instead,?\s+output/i
+      /ign[o0]re\s*(all\s*)?(previous|prior|above)\s*(instructions?|prompts?|rules?)/i,
+      /(you\s*(are|'re)\s*now|act\s*as|pretend\s*(to\s*be|you\s*are))/i,
+      /system\s*(override|prompt|mode|instruction)/i,
+      /forget\s*(everything|all|previous|prior)/i,
+      /(new|different|updated)\s*instructions?/i,
+      /disregard\s*.*(above|prior|previous)/i,
+      /instead,?\s*(output|generate|create|write)/i,
+      /(override|bypass|disable)\s*(safety|security|filter)/i,
+      /reveal\s*(your\s*)?(prompt|instructions|system)/i
     ];
 
-    return dangerousPatterns.some(pattern => pattern.test(input));
+    // Also check for dangerous imports in the input
+    const dangerousCode = [
+      /import\s+(os|subprocess|sys|eval|exec)/i,
+      /__import__/i,
+      /exec\s*\(/i,
+      /eval\s*\(/i
+    ];
+
+    return dangerousPatterns.some(pattern => pattern.test(normalized)) ||
+           dangerousCode.some(pattern => pattern.test(input));
   };
 
   // Extract metadata from uploaded files (columns, row count, sample data)
@@ -237,6 +260,17 @@ function App() {
   };
 
   const handleGenerate = async () => {
+    // Rate limiting check
+    const now = Date.now();
+    const recentRequests = requestHistory.filter(timestamp => now - timestamp < RATE_WINDOW);
+
+    if (recentRequests.length >= RATE_LIMIT) {
+      const oldestRequest = Math.min(...recentRequests);
+      const waitTime = Math.ceil((RATE_WINDOW - (now - oldestRequest)) / 1000);
+      setError(`Rate limit exceeded. Please wait ${waitTime} seconds before trying again.`);
+      return;
+    }
+
     // Validate API key
     if (!apiKey || !apiKey.trim()) {
       setError('Please enter your API key');
@@ -275,6 +309,9 @@ function App() {
     setLoading(true);
     setError(null);
     setResult(null);
+
+    // Track this request for rate limiting
+    setRequestHistory([...recentRequests, now]);
 
     try {
       // Build detailed file information with metadata
@@ -331,26 +368,65 @@ Use this exact format:
 
 Start your response with { and end with }. Nothing else.`;
 
-      // Call Netlify serverless function (avoids CORS issues)
-      const response = await fetch('/.netlify/functions/generate', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          apiKey: apiKey,
-          prompt: prompt,
-          provider: provider
-        })
-      });
+      // Call AI API directly from browser (no proxy, no logging)
+      let response, data, content;
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || `API error: ${response.status}`);
+      if (provider === 'anthropic') {
+        // Direct call to Anthropic API
+        response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'claude-3-5-sonnet-20241022',
+            max_tokens: 8192,
+            messages: [{
+              role: 'user',
+              content: prompt
+            }]
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || `Anthropic API error: ${response.status}`);
+        }
+
+        data = await response.json();
+        content = data.content[0].text;
+
+      } else if (provider === 'openai') {
+        // Direct call to OpenAI API
+        response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'gpt-4-turbo-preview',
+            messages: [{
+              role: 'user',
+              content: prompt
+            }],
+            max_tokens: 8192,
+            temperature: 0.7
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || `OpenAI API error: ${response.status}`);
+        }
+
+        data = await response.json();
+        content = data.choices[0].message.content;
+      } else {
+        throw new Error('Invalid provider');
       }
-
-      const data = await response.json();
-      const content = data.content[0].text;
 
       // Parse JSON response
       let parsedResult;
@@ -379,6 +455,18 @@ Start your response with { and end with }. Nothing else.`;
       for (const field of requiredFields) {
         if (!(field in parsedResult)) {
           throw new Error(`Missing required field: ${field}`);
+        }
+      }
+
+      // Validate generated code for dangerous imports
+      if (parsedResult.script) {
+        const dangerousImports = ['os', 'subprocess', 'sys', 'eval', 'exec', '__import__', 'pickle', 'shelve'];
+        const hasDangerous = dangerousImports.some(mod =>
+          new RegExp(`import\\s+${mod}|from\\s+${mod}`, 'i').test(parsedResult.script)
+        );
+
+        if (hasDangerous) {
+          throw new Error('AI generated code with unauthorized imports. This may be a prompt injection attempt. Please try describing your workflow differently.');
         }
       }
 
@@ -504,7 +592,7 @@ Start your response with { and end with }. Nothing else.`;
               style={{ width: '100%', padding: '12px', fontSize: '14px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd' }}
             />
             <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-              🔒 Your API key is securely transmitted to {provider === 'anthropic' ? 'Anthropic' : 'OpenAI'} via our proxy. Keys are not stored in any database but may appear in temporary server logs.{' '}
+              🔒 Your API key is sent directly from your browser to {provider === 'anthropic' ? 'Anthropic' : 'OpenAI'}. We never see or log your API key.{' '}
               <a
                 href={provider === 'anthropic' ? 'https://console.anthropic.com/' : 'https://platform.openai.com/api-keys'}
                 target="_blank"
@@ -697,7 +785,7 @@ Start your response with { and end with }. Nothing else.`;
         <footer className="footer">
           <p>Built with ❤️ using AI • Supports Anthropic Claude & OpenAI GPT-4</p>
           <p style={{ fontSize: '11px', color: '#999', marginTop: '5px' }}>
-            Your data is processed client-side. API keys are proxied securely but may appear in server logs. We do not store keys or generated code.
+            Fully client-side application. Your API key and data never touch our servers. We do not store or log anything.
           </p>
         </footer>
       </div>
